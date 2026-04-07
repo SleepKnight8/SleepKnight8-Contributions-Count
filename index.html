@@ -35,17 +35,16 @@
 
 <script>
 const username = "SleepKnight8";
-
 const years = [2024, 2025, 2026];
 
 async function getContributions(year) {
   const url = `https://github.com/users/${username}/contributions?from=${year}-01-01&to=${year}-12-31`;
+  const proxy = "https://api.allorigins.win/raw?url=";
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(proxy + encodeURIComponent(url));
     const text = await response.text();
 
-    // Extract all contribution counts from SVG rectangles
     const matches = [...text.matchAll(/data-count="(\d+)"/g)];
 
     let total = 0;
