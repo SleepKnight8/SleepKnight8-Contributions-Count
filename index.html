@@ -2,14 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>GitHub Contributions Count</title>
+<title>GitHub Public Contributions Count</title>
 <style>
   body {
     font-family: Arial, sans-serif;
     padding: 20px;
   }
   h1 {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
+  }
+  p.note {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 20px;
   }
   .year-box {
     border: 1px solid #ccc;
@@ -30,27 +35,28 @@
 </head>
 <body>
 
-<h1>GitHub Contributions Count</h1>
+<h1>GitHub Public Contributions</h1>
+<p class="note">Note: Only public contributions (commits to public repos) are displayed.</p>
 <div id="results"></div>
 
 <script>
 const username = "SleepKnight8";
-const years = [2024, 2025, 2026];
 
-async function getContributions(year) {
-  const url = `https://github.com/users/${username}/contributions?from=${year}-01-01&to=${year}-12-31`;
-  const proxy = "https://api.allorigins.win/raw?url=";
+const endpoints = {
+  2024: "https://github-contributions-api.jogruber.de/v4/SleepKnight8?y=2024",
+  2025: "https://github-contributions-api.jogruber.de/v4/SleepKnight8?y=2025",
+  2026: "https://github-contributions-api.jogruber.de/v4/SleepKnight8?y=2026"
+};
 
+async function getContributions(year, url) {
   try {
-    const response = await fetch(proxy + encodeURIComponent(url));
-    const text = await response.text();
+    const res = await fetch(url);
+    const data = await res.json();
 
-    const matches = [...text.matchAll(/data-count="(\d+)"/g)];
+    // API returns { total: { "2024": number } }
+    const count = data.total?.[year] ?? 0;
 
-    let total = 0;
-    matches.forEach(m => total += parseInt(m[1]));
-
-    return total;
+    return count;
   } catch (err) {
     console.error(err);
     return "Error";
@@ -58,17 +64,24 @@ async function getContributions(year) {
 }
 
 (async function() {
-  for (const year of years) {
-    const count = await getContributions(year);
+  for (const year in endpoints) {
+
+    // Add loading UI
     document.getElementById("results").innerHTML += `
-      <div class="year-box">
+      <div class="year-box" id="year-${year}">
         <div class="year-title">${year}</div>
-        <div class="count">${count}</div>
+        <div class="count">Loading...</div>
       </div>
     `;
+
+    const count = await getContributions(year, endpoints[year]);
+
+    document.querySelector(`#year-${year} .count`).textContent =
+      typeof count === "number"
+        ? count.toLocaleString()
+        : "Error";
   }
 })();
 </script>
-
 </body>
 </html>
