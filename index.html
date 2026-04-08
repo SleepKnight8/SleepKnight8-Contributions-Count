@@ -4,56 +4,54 @@
 <meta charset="UTF-8">
 <title>GitHub Public Contributions Count</title>
 <link rel="stylesheet" href="style.css">
+<link rel="icon" href="SleepKnight8ContributionCountLogo.jpg">
 </head>
 <body>
-
 <h1>GitHub Public Contributions</h1>
-<p class="note">Note: Only public contributions (commits to public repos) are displayed.</p>
+<p>Note: Only public contributions are displayed.</p>
 <div id="results"></div>
+
+<h2>The Best Developer</h2>
+<a href="https://github.com/sleepknight8" target="_blank">
+  <h2>SleepKnight8</h2>
+</a>
+
+<pre id="copyright", style="color: #f5e05a;">&copy; 2026 SleepKnight8. All rights reserved.</pre>
+
 
 <script>
 const username = "SleepKnight8";
 
-const endpoints = {
-  2024: "https://github-contributions-api.jogruber.de/v4/SleepKnight8?y=2024",
-  2025: "https://github-contributions-api.jogruber.de/v4/SleepKnight8?y=2025",
-  2026: "https://github-contributions-api.jogruber.de/v4/SleepKnight8?y=2026"
-};
+const years = [2026, 2025, 2024];
 
-async function getContributions(year, url) {
+async function getContributions(year) {
   try {
-    const res = await fetch(url);
+    const res = await fetch(`https://github-contributions-api.jogruber.de/v4/${username}?y=${year}`);
     const data = await res.json();
-
-    // API returns { total: { "2024": number } }
-    const count = data.total?.[year] ?? 0;
-
-    return count;
-  } catch (err) {
-    console.error(err);
+    return data.total?.[year] ?? 0;
+  } catch {
     return "Error";
   }
 }
 
 (async function() {
-  for (const year in endpoints) {
+  const container = document.getElementById("results");
 
-    // Add loading UI
-    document.getElementById("results").innerHTML += `
+  for (const year of years) {
+    container.innerHTML += `
       <div class="year-box" id="year-${year}">
         <div class="year-title">${year}</div>
         <div class="count">Loading...</div>
       </div>
     `;
 
-    const count = await getContributions(year, endpoints[year]);
+    const count = await getContributions(year);
 
     document.querySelector(`#year-${year} .count`).textContent =
-      typeof count === "number"
-        ? count.toLocaleString()
-        : "Error";
+      typeof count === "number" ? count.toLocaleString() : "Error";
   }
 })();
 </script>
+
 </body>
 </html>
